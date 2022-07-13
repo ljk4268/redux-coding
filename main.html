@@ -26,19 +26,39 @@
   
 
     // redux의 store에 있는 내용을 바탕으로 아래 HTML을 수정하려고 한다. 
+
+    
+
     function TOC(){
 
      // getState로 state값을 가져올 수 있다. >> 직접 수정하지 못하도록 state 보호! 
       let state = store.getState();
       let i = 0;
       let liTags = '';
+
+      // store의 state값 변경하기 
+      // action을 발생시키고 dispatch를 통해 reducer를 실행시키면 reducer가 새로운 state를 만들어낸다. 
+      //state의 값이 바뀌면 UI가 업데이트 된다. 
       while(i<state.contents.length){
+        // 글목록을 클릭했을 때 action을 만듬. 
         liTags = liTags + `
             <li>
-              <a href="${state.contents[i].id}">
+              <a onclick="
+              // a태그의 기본적인 동작을 막아줌 
+                event.preventDefault();
+
+                // aciton을 만들어야하는데 action의 필수적인 프로퍼티는 type임. 
+                // 객체를 변수로 만들어주고 
+                let action = {type:'SELECT', id:${state.contents[i].id}}
+
+                // store에 dispatch로 action을 넘겨준다. 
+                // 이러면 reducer()가 호출된다
+                store.dispatch(action)
+
+              " href="${state.contents[i].id}">
                 ${state.contents[i].title}
               </a>
-              </li>
+            </li>
             `;
         i = i + 1;
       }
@@ -74,12 +94,14 @@
     //  reducer함수가 return하는 값은 새로운 state값이 된다. 
 
     function reducer(state, action){
+      console.log(state, action);
       // store를 처음 최초 생성하면 최초 1회 action과는 상관없이 state값이 호출되는데 
       // 그때 state값이 undefined인데 이떄 초기값을 세팅할 수 있다. 
 
         if( state == undefined){
           // 여기서 최초로 애플리케이션이 필요로할만한 값을 넣어주면 된다. 
           return {
+            selected_id:null,
             contents:[
                 {id:1, title:'HTML', desc: 'HTML is ..'},
                 {id:2, title:'CSS', desc: 'CSS is ..'},
@@ -87,7 +109,16 @@
 
           }
         }
-        return 
+        // action을 통해 reducer()가 실행되었을 때 ! 
+        // state값을 리턴할때는 복제된 값을 리턴해야한다! 
+        let  newState;
+        if( action.type === 'SELECT'){
+          newState = Object.assign({}, state, {selected_id:action.id})
+        }
+      console.log(action, state, newState);
+      return newState;
+
+        
     }
     // 만들어진 스토어를 변수로 만들어서 전역에서 사용할 수 있는 변수로 만듬. 
     let store = Redux.createStore(reducer);
