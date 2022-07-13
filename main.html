@@ -80,14 +80,33 @@
       `
     }
     
+    // selected_id에 따라서 본문의 내용이 달라져야함. 
     function article(){
+
+      let state = store.getState();
+      let i = 0;
+      let aTitle, aDesc;
+      while (i< state.contents.length){
+        if(state.contents[i].id === state.selected_id) {
+          aTitle = state.contents[i].title;
+          aDesc = state.contents[i].desc;
+          break;
+        }
+
+        i = i + 1;
+      }
+
+
       document.querySelector('#content').innerHTML = `
       <article>
-        <h2>HTML</h2>
-        HTML is ...
+        <h2>${aTitle}</h2>
+        ${aDesc}
       </article>
       `
     }
+
+
+
     // 리덕스를 이용하기 위해 먼저 store를 만들어야한다. 
     // 리덕스 함수를 호출할 때 꼭 써줘야하는 함수가 reducer함수, 
     // reducer함수는 이전의 state값과 호출된 이후의 action값을 파라미터로 받는다.
@@ -101,7 +120,7 @@
         if( state == undefined){
           // 여기서 최초로 애플리케이션이 필요로할만한 값을 넣어주면 된다. 
           return {
-            selected_id:null,
+            selected_id:1,
             contents:[
                 {id:1, title:'HTML', desc: 'HTML is ..'},
                 {id:2, title:'CSS', desc: 'CSS is ..'},
@@ -122,11 +141,14 @@
     }
     // 만들어진 스토어를 변수로 만들어서 전역에서 사용할 수 있는 변수로 만듬. 
     let store = Redux.createStore(reducer);
-    
+    store.subscribe(article)
 
     subject();
     TOC();
     control();
+    // state값에 따라 본문의 내용이 달라지게 하려면
+    // state값이 변경되었을 때 자동으로 article()가 호출되게 하면 된다. 
+    //store.subscribe(article) <<< 이렇게 쓰면됨 
     article();
 
 
